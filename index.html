@@ -66,18 +66,18 @@
           file: g.file_,
         });
         var newwindow = timeRange();
-        lastwindow = newwindow;
         if (g.dateWindow_[1] > newwindow[1]) {
-	  // we're scrolled past data right, keep current window.
-	  newwindow = g.dateWindow_;
-	} else if (g.dateWindow_[1] >= lastwindow[1]) {
-	  // we were scrolled out, but with the new data point,
-	  // we caught up to it.  keep window size, scroll.
-	  newwindow[0] = newwindow[1] - (g.dateWindow_[1] - g.dateWindow_[0]);
-	} else {
-	  // must be somewhere else.  keep current window.
-	  newwindow = g.dateWindow_;
-	}
+          // we're scrolled past data right, keep current window.
+          newwindow = g.dateWindow_;
+        } else if (g.dateWindow_[1] >= lastwindow[1]) {
+          // we were scrolled out, but with the new data point,
+          // we caught up to it.  keep window size, scroll.
+          newwindow[0] = newwindow[1] - (g.dateWindow_[1] - g.dateWindow_[0]);
+        } else {
+          // must be somewhere else.  keep current window.
+          newwindow = g.dateWindow_;
+        }
+        lastwindow = newwindow;
         g.updateOptions({
           dateWindow: newwindow
         });
