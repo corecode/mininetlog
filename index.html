@@ -3,21 +3,32 @@
     <script src="http://dygraphs.com/dygraph-combined.js"></script>
   </head>
   <body>
-    <div id="chart" style="width: 75%; max-width: 100em; text-align: center;" />
+    <div id="chart" style="width: 75%; max-width: 50em; margin: auto;" />
     <script type="text/javascript">
       var now = new Date().valueOf();
-      var start = now - 4*3600*1000;
+      var start = now - 24*3600*1000;
       var chartdiv = document.getElementById("chart");
       var g = new Dygraph(
         chartdiv,
         location.hash.replace("#", ""),
         {
+          legend: 'always',
           labelsKMB: true,
           showRoller: true,
           rollPeriod: 5,
           dateWindow: [start, now],
           height: chartdiv.clientWidth * 9 / 16
         });
+      // Fix up data, from raw bytes to bits/s
+      var lasttime = 0;
+      for (var i = 0; i < g.rawData_.length; i++) {
+        var col = g.rawData_[i];
+        for (var j = 1; j < col.length; j++) {
+          col[j] *= 8 / ((col[0] - lasttime) / 1000);
+        }
+        lasttime = col[0];
+      }
+      g.predraw_();
     </script>
   </body>
 </html>
