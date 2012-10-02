@@ -123,7 +123,8 @@ if flush_score == stats.length
       begin
         data = Zlib::GzipReader.open(nv) {|nf| nf.read}
       rescue Errno::ENOENT
-        data = ""
+        # New archive, put headers in first line
+        data = "Time,IPv4 in, IPv4 out, IPv6 in, IPv6 out\n"
       end
 
       File.open(volatile, 'r+') do |f|
