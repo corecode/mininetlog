@@ -6,6 +6,7 @@ VOLATILE_DIR=/run/mininetlog
 not_found() {
         echo "Status: 404 Not Found"
         echo ""
+	[ -n "$*" ] && echo "$*"
         exit
 }
 
@@ -14,7 +15,7 @@ IFACE=$PATH_INFO
 
 case "$IFACE" in
 */*)
-	not_found
+	not_found "$IFACE"
 	;;
 esac
 
