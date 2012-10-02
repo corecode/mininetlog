@@ -12,8 +12,8 @@
     <script type="text/javascript">
       // Fix up data, from raw bytes to bits/s
       var oldparsecsv = Dygraph.prototype.parseCSV_;
-      Dygraph.prototype.parseCSV_ = function() {
-        var data = oldparsecsv.call(this);
+      Dygraph.prototype.parseCSV_ = function(csvdata) {
+        var data = oldparsecsv.call(this, csvdata);
         var lasttime = 0;
         for (var i = 0; i < data.length; i++) {
           var col = data[i];
