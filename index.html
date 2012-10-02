@@ -32,8 +32,24 @@
         return [start, now];
       }
 
-      var lastwindow = timeRange();
       var chartdiv = document.getElementById("chart");
+
+      function aspect() {
+        var winheight = document.documentElement.clientHeight;
+        var newheight = chartdiv.clientWidth * 6 / 10;
+        var maxheight = winheight * 9 / 10;
+        if (newheight > maxheight) {
+          newheight = maxheight;
+        }
+        chartdiv.style.height = newheight + "px";
+        chartdiv.style.position = "relative";
+        chartdiv.style.top = (winheight - newheight) / 2 + "px";
+        g.resize();
+      }
+      aspect();
+      window.addEventListener('resize', aspect);
+
+      var lastwindow = timeRange();
       var g = new Dygraph(
         chartdiv,
         location.hash.replace("#", ""),
@@ -62,20 +78,6 @@
           dateWindow: newwindow
         });
       }, 60*1000);
-
-      function aspect() {
-        var winheight = document.documentElement.clientHeight;
-        var newheight = chartdiv.clientWidth * 6 / 10;
-        var maxheight = winheight * 9 / 10;
-        if (newheight > maxheight) {
-          newheight = maxheight;
-        }
-        chartdiv.style.height = newheight + "px";
-        chartdiv.style.position = "relative";
-        chartdiv.style.top = (winheight - newheight) / 2 + "px";
-      }
-      aspect();
-      window.addEventListener('resize', aspect);
     </script>
   </body>
 </html>
