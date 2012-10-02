@@ -4,7 +4,7 @@ NV_DIR=/var/lib/mininetlog
 VOLATILE_DIR=/run/mininetlog
 
 not_found() {
-        echo "404 Not Found"
+        echo "Status: 404 Not Found"
         echo ""
         exit
 }
@@ -23,7 +23,6 @@ VOLATILE_NAME="$VOLATILE_DIR/$IFACE.log"
 
 [ ! -e "$NV_NAME" -a ! -e "$VOLATILE_NAME" ] && not_found
 
-echo "200 Wicked Data"
 echo "Content-type: text/csv"
 echo ""
 
