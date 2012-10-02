@@ -11,7 +11,7 @@ not_found() {
 }
 
 
-IFACE=$PATH_INFO
+IFACE=${PATH_INFO#/}
 
 case "$IFACE" in
 */*)
