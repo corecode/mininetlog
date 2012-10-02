@@ -3,10 +3,32 @@
     <script src="http://dygraphs.com/dygraph-combined.js"></script>
   </head>
   <body>
-    <div id="chart" style="width: 75%; max-width: 50em; margin: auto;" />
+    <div style="display: inline-block; position: relative; width: 75%;
+		max-width: 50em; margin: auto;">
+      <div style="padding-top: 65%" />
+      <div id="chart" style="position: absolute; top: 0; bottom: 0;
+			     left: 0; right: 0;" />
+    </div>
     <script type="text/javascript">
-      var now = new Date().valueOf();
-      var start = now - 24*3600*1000;
+      // Fix up data, from raw bytes to bits/s
+      var oldparsecsv = Dygraph.prototype.parseCSV_;
+      Dygraph.prototype.parseCSV_ = function() {
+        var data = oldparsecsv.call(this);
+        var lasttime = 0;
+        for (var i = 0; i < data.length; i++) {
+          var col = data[i];
+          for (var j = 1; j < col.length; j++) {
+            col[j] *= 8 / ((col[0] - lasttime) / 1000);
+          }
+          lasttime = col[0];
+        }
+        return data;
+      }
+      function timeRange() {
+        var now = new Date().valueOf();
+        var start = now - 24*3600*1000;
+        return [start, now];
+      }
       var chartdiv = document.getElementById("chart");
       var g = new Dygraph(
         chartdiv,
@@ -16,19 +38,14 @@
           labelsKMB: true,
           showRoller: true,
           rollPeriod: 5,
-          dateWindow: [start, now],
-          height: chartdiv.clientWidth * 9 / 16
+          dateWindow: timeRange(),
         });
-      // Fix up data, from raw bytes to bits/s
-      var lasttime = 0;
-      for (var i = 0; i < g.rawData_.length; i++) {
-        var col = g.rawData_[i];
-        for (var j = 1; j < col.length; j++) {
-          col[j] *= 8 / ((col[0] - lasttime) / 1000);
-        }
-        lasttime = col[0];
-      }
-      g.predraw_();
+      var timer = setInterval(function() {
+        g.updateOptions({
+          file: g.file_,
+          dateWindow: timeRange()
+        });
+      }, 60*1000);
     </script>
   </body>
 </html>
