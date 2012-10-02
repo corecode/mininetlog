@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <script src="http://dygraphs.com/dygraph-combined.js" />
+  </head>
+  <body>
+    <div id="chart" />
+    <script type="text/javascript">
+      g = new Dygraph(
+        document.getElementById("chart"),
+        location.href.replace("#", ""));
+    </script>
+  </body>
+</html>
