@@ -4,10 +4,12 @@ NV_DIR=/var/lib/mininetlog
 VOLATILE_DIR=/run/mininetlog
 
 not_found() {
-        echo "Status: 404 Not Found"
-        echo ""
+	echo "Status: 404 Not Found"
+	echo ""
+	echo "404 Not Found"
+	echo ""
 	[ -n "$*" ] && echo "$*"
-        exit
+	exit
 }
 
 
