@@ -3,11 +3,21 @@
     <script src="http://dygraphs.com/dygraph-combined.js"></script>
   </head>
   <body>
-    <div id="chart" />
+    <div id="chart" style="width: 75%; max-width: 100em; text-align: center;" />
     <script type="text/javascript">
-      g = new Dygraph(
-        document.getElementById("chart"),
-        location.href.replace("#", ""));
+      var now = new Date().valueOf();
+      var start = now - 4*3600*1000;
+      var chartdiv = document.getElementById("chart");
+      var g = new Dygraph(
+        chartdiv,
+        location.hash.replace("#", ""),
+        {
+          labelsKMB: true,
+          showRoller: true,
+          rollPeriod: 5,
+          dateWindow: [start, now],
+          height: chartdiv.clientWidth * 9 / 16
+        });
     </script>
   </body>
 </html>
