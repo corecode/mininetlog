@@ -1,10 +1,23 @@
 #!/usr/bin/env ruby
 
+require 'optparse'
 require 'zlib'
 
 logdir_volatile = "/run/mininetlog"
 logdir_nv = "/var/lib/mininetlog"
-flush_timeout = 60
+flush_timeout = 3600
+
+OptionParser.new do |opts|
+  opts.on("--volatiledir DIR", "Volatile log dir") do |dir|
+    logdir_volatile = dir
+  end
+  opts.on("--nvdir DIR", "Non-volatile log dir") do |dir|
+    logdir_nv = dir
+  end
+  opts.on("-t", "--flushtime TIME", Integer, "Flush after TIME seconds") do |time|
+    flush_timeout = time
+  end
+end.parse!
 
 begin
   Dir.mkdir(logdir_volatile, 0755)
