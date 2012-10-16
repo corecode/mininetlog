@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+require 'zlib'
+
 logdir_volatile = "/run/mininetlog"
 logdir_nv = "/var/lib/mininetlog"
 flush_timeout = 60
@@ -63,10 +65,11 @@ stats.each do |iface, stat|
   fname = iface + '.log'
   fname_volatile = File.join(logdir_volatile, fname)
   File.open(fname_volatile, 'a') do |f|
+    f.flock(File::LOCK_EX)
     f.puts "#{nowstr},#{stat[:in]},#{stat[:out]}"
   end
 
-  fname_nv = File.join(logdir_nv, fname)
+  fname_nv = File.join(logdir_nv, fname + ".gz")
   flush_names << [fname_volatile, fname_nv]
 
   begin
@@ -81,13 +84,28 @@ end
 
 if flush_score == stats.length
   flush_names.each do |volatile, nv|
-    File.open(nv, 'a') do |nf|
+    new_nv = nv + ".new"
+    File.open(new_nv, File::WRONLY | File::CREAT) do |new_nf|
+      next if not new_nf.flock(File::LOCK_EX | File::LOCK_NB)
+      new_nf.truncate(0)
+      new_nf_gz = Zlib::GzipWriter.new(new_nf)
+
+      begin
+        data = Zlib::GzipReader.open(nv) {|nf| nf.read}
+      rescue Errno::ENOENT
+        data = ""
+      end
+
       File.open(volatile, 'r+') do |f|
-        data = f.read
-        nf.write data
-        nf.fsync
+        f.flock(File::LOCK_EX)
+        data += f.read
+        new_nf_gz.write data
+        new_nf_gz.flush
+        new_nf.fsync
         f.truncate(0)
         f.fsync
+        File.rename(new_nv, nv)
+        new_nf_gz.close
       end
     end
   end
