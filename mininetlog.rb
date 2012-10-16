@@ -17,45 +17,54 @@ rescue Errno::EEXIST
 end
 
 
-stats = {}
-
 now = Time.now
 nowstr = now.strftime("%Y/%m/%d %H:%M:%S")
 
-`iptables -t mangle -v -S`.split("\n").each do |l|
-  dir = nil
-  iface = nil
+stats = {}
+[4, 6].each do |ipver|
+  cmd = case ipver
+        when 4
+          'iptables'
+        when 6
+          'ip6tables'
+        end
 
-  ctr = l.match(/-c \d+ (\d+)/)
-  next if not ctr
+  `#{cmd} -t mangle -v -Z -S`.split("\n").each do |l|
+    dir = nil
+    iface = nil
 
-  case l
-  when /-j stats/
-    iface = "all"
-    m = l.match(/-A (PREROUTING|POSTROUTING)/)
-    next if not m
-    case m[1]
-    when 'PREROUTING'
-      dir = :in
-    when 'POSTROUTING'
-      dir = :out
+    ctr = l.match(/-c \d+ (\d+)/)
+    next if not ctr
+
+    case l
+    when /-j stats/
+      iface = "all"
+      m = l.match(/-A (PREROUTING|POSTROUTING)/)
+      next if not m
+      case m[1]
+      when 'PREROUTING'
+        dir = :in
+      when 'POSTROUTING'
+        dir = :out
+      end
+    when /-A stats/
+      m = l.match(/-([io]) (\w+)/)
+      next if not m
+      iface = m[2]
+      case m[1]
+      when 'i'
+        dir = :in
+      when 'o'
+        dir = :out
+      end
+    else
+      next
     end
-  when /-A stats/
-    m = l.match(/-([io]) (\w+)/)
-    next if not m
-    iface = m[2]
-    case m[1]
-    when 'i'
-      dir = :in
-    when 'o'
-      dir = :out
-    end
-  else
-    next
+
+    stats[iface] ||= {}
+    key = "#{dir}#{ipver}".to_sym
+    stats[iface][key] = ctr[1].to_i
   end
-
-  stats[iface] ||= {}
-  stats[iface][dir] = ctr[1].to_i
 end
 
 flush_score = 0
@@ -66,7 +75,7 @@ stats.each do |iface, stat|
   fname_volatile = File.join(logdir_volatile, fname)
   File.open(fname_volatile, 'a') do |f|
     f.flock(File::LOCK_EX)
-    f.puts "#{nowstr},#{stat[:in]},#{stat[:out]}"
+    f.puts "#{nowstr},#{stat[:in4]},#{stat[:out4]},#{stat[:in6]},#{stat[:out6]}"
   end
 
   fname_nv = File.join(logdir_nv, fname + ".gz")
