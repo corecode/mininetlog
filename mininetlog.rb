@@ -70,6 +70,14 @@ end
 flush_score = 0
 flush_names = []
 
+if !ARGV.empty?
+  stats.keys.each do |iface|
+    if !ARGV.include? iface
+      stats.delete iface
+    end
+  end
+end
+
 stats.each do |iface, stat|
   fname = iface + '.log'
   fname_volatile = File.join(logdir_volatile, fname)
